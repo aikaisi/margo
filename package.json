@@ -1,0 +1,539 @@
+{
+  "name": "margo",
+  "displayName": "Margo — AI-Ready Code Notes & Annotations",
+  "description": "Add local code notes and annotations to your files without modifying source. Structured for easy handoff to AI assistants. Features: priority levels, categories, resolve/reopen, tree view with grouping & filters, export to Markdown/HTML, AI prompt copy.",
+  "version": "0.1.0",
+  "publisher": "aikaisi",
+  "author": "Abbas Al-Kaisi <alkaisiabbas@gmail.com>",
+  "license": "AGPL-3.0-only",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aikaisi/margo"
+  },
+  "homepage": "https://github.com/aikaisi/margo#readme",
+  "bugs": {
+    "url": "https://github.com/aikaisi/margo/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "margo",
+    "code notes",
+    "annotations",
+    "comments",
+    "review",
+    "todo",
+    "ai",
+    "llm",
+    "copilot",
+    "ai prompt",
+    "mcp",
+    "documentation",
+    "productivity"
+  ],
+  "galleryBanner": {
+    "color": "#1e1e2e",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Margo",
+      "properties": {
+        "margo.defaultAuthor": {
+          "type": "string",
+          "default": "",
+          "description": "Default author name for new notes. Leave empty to use the OS username."
+        },
+        "margo.defaultPriority": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "default": "medium",
+          "description": "Default priority for new notes."
+        },
+        "margo.defaultCategory": {
+          "type": "string",
+          "enum": [
+            "todo",
+            "bug",
+            "note"
+          ],
+          "default": "note",
+          "description": "Default category for new notes."
+        },
+        "margo.confirmDelete": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a confirmation dialog before deleting a note."
+        },
+        "margo.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the note count in the status bar."
+        },
+        "margo.treeGroupBy": {
+          "type": "string",
+          "enum": [
+            "file",
+            "category",
+            "priority",
+            "status",
+            "vault"
+          ],
+          "enumDescriptions": [
+            "Group notes by file path",
+            "Group notes by category (TODO, BUG, etc.)",
+            "Group notes by priority (High, Medium, Low)",
+            "Group notes by status (Open, Resolved)",
+            "Group notes by vault (Local, Team)"
+          ],
+          "default": "category",
+          "description": "Default grouping mode for the notes tree view."
+        },
+        "margo.showResolvedNotes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show resolved notes in the editor and tree view."
+        },
+        "margo.lineTracking": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically adjust note positions when lines are added or removed."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "margo.addNote",
+        "title": "Add Note",
+        "icon": "$(add)"
+      },
+      {
+        "command": "margo.createNote",
+        "title": "Save Note",
+        "icon": "$(check)"
+      },
+      {
+        "command": "margo.saveNote",
+        "title": "Save"
+      },
+      {
+        "command": "margo.cancelNote",
+        "title": "Cancel"
+      },
+      {
+        "command": "margo.discardNote",
+        "title": "Discard",
+        "icon": "$(close)"
+      },
+      {
+        "command": "margo.deleteNote",
+        "title": "Delete Note",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "margo.editNote",
+        "title": "Edit",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "margo.editProperties",
+        "title": "Edit Category & Priority",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "margo.resolveNote",
+        "title": "Resolve",
+        "icon": "$(check)"
+      },
+      {
+        "command": "margo.unresolveNote",
+        "title": "Reopen",
+        "icon": "$(circle-outline)"
+      },
+      {
+        "command": "margo.resolveNoteFromTree",
+        "title": "Resolve Note",
+        "icon": "$(check)"
+      },
+      {
+        "command": "margo.unresolveNoteFromTree",
+        "title": "Reopen Note",
+        "icon": "$(circle-outline)"
+      },
+      {
+        "command": "margo.setPriorityHigh",
+        "title": "Set Priority: 🔴 High"
+      },
+      {
+        "command": "margo.setPriorityMedium",
+        "title": "Set Priority: 🟡 Medium"
+      },
+      {
+        "command": "margo.setPriorityLow",
+        "title": "Set Priority: 🟢 Low"
+      },
+      {
+        "command": "margo.setCategoryTodo",
+        "title": "Set Category: 📋 TODO"
+      },
+      {
+        "command": "margo.setCategoryBug",
+        "title": "Set Category: 🐛 BUG"
+      },
+      {
+        "command": "margo.setCategoryNote",
+        "title": "Set Category: 📝 NOTE"
+      },
+      {
+        "command": "margo.refreshTree",
+        "title": "Refresh Notes",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "margo.switchGroupBy",
+        "title": "Group By…",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "margo.groupByFile",
+        "title": "Group by File"
+      },
+      {
+        "command": "margo.groupByCategory",
+        "title": "Group by Category"
+      },
+      {
+        "command": "margo.groupByPriority",
+        "title": "Group by Priority"
+      },
+      {
+        "command": "margo.groupByStatus",
+        "title": "Group by Status"
+      },
+      {
+        "command": "margo.groupByVault",
+        "title": "Group by Vault"
+      },
+      {
+        "command": "margo.filterNotes",
+        "title": "Filter Notes…",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "margo.clearFilter",
+        "title": "Clear Filters",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "margo.exportMarkdown",
+        "title": "Export Notes to Markdown",
+        "icon": "$(markdown)"
+      },
+      {
+        "command": "margo.exportHtml",
+        "title": "Export Notes to HTML",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "margo.copyAsAiPrompt",
+        "title": "Copy as AI Prompt",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "margo.setVaultLocal",
+        "title": "Move to Local Vault",
+        "icon": "$(account)"
+      },
+      {
+        "command": "margo.setVaultTeam",
+        "title": "Move to Team Vault",
+        "icon": "$(organization)"
+      },
+      {
+        "command": "margo.goToNote",
+        "title": "Go to Note"
+      },
+      {
+        "command": "margo.deleteNoteFromTree",
+        "title": "Delete Note",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "margo.armDeleteNote",
+        "title": "Delete Note",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "margo.confirmDeleteNote",
+        "title": "Confirm Delete",
+        "icon": "$(error)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "margo.addNote",
+        "key": "ctrl+shift+n",
+        "mac": "cmd+shift+n",
+        "when": "editorTextFocus"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "margo",
+          "title": "Margo",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "margo": [
+        {
+          "id": "margoExplorer",
+          "name": "Notes Explorer",
+          "icon": "$(comment-discussion)",
+          "contextualTitle": "Margo"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "margoExplorer",
+        "contents": "No notes yet.\n\nAdd a note by right-clicking on a line in the editor or using the keyboard shortcut:\n[Add Note](command:margo.addNote)\n\nOr press Ctrl+Shift+N (Cmd+Shift+N on Mac)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "margo.addNote",
+          "group": "navigation@1",
+          "when": "editorTextFocus"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "margo.switchGroupBy",
+          "when": "view == margoExplorer",
+          "group": "navigation@0"
+        },
+        {
+          "command": "margo.filterNotes",
+          "when": "view == margoExplorer",
+          "group": "navigation@1"
+        },
+        {
+          "command": "margo.refreshTree",
+          "when": "view == margoExplorer",
+          "group": "navigation@2"
+        },
+        {
+          "command": "margo.clearFilter",
+          "when": "view == margoExplorer",
+          "group": "navigation@3"
+        },
+        {
+          "command": "margo.exportMarkdown",
+          "when": "view == margoExplorer",
+          "group": "export@1"
+        },
+        {
+          "command": "margo.exportHtml",
+          "when": "view == margoExplorer",
+          "group": "export@2"
+        },
+        {
+          "command": "margo.copyAsAiPrompt",
+          "when": "view == margoExplorer",
+          "group": "export@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "margo.deleteNoteFromTree",
+          "when": "view == margoExplorer && viewItem =~ /^note/",
+          "group": "inline@1"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "margo.createNote",
+          "group": "inline@1",
+          "when": "commentController == margo && commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.discardNote",
+          "group": "inline@2",
+          "when": "commentController == margo && commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.setPriorityHigh",
+          "group": "1_priority@1",
+          "when": "commentController == margo && !commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.setPriorityMedium",
+          "group": "1_priority@2",
+          "when": "commentController == margo && !commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.setPriorityLow",
+          "group": "1_priority@3",
+          "when": "commentController == margo && !commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.setCategoryTodo",
+          "group": "2_category@1",
+          "when": "commentController == margo && !commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.setCategoryBug",
+          "group": "2_category@2",
+          "when": "commentController == margo && !commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.setCategoryNote",
+          "group": "2_category@5",
+          "when": "commentController == margo && !commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.resolveNote",
+          "group": "3_status@1",
+          "when": "commentController == margo && !commentThreadIsEmpty"
+        },
+        {
+          "command": "margo.unresolveNote",
+          "group": "3_status@2",
+          "when": "commentController == margo && !commentThreadIsEmpty"
+        }
+      ],
+      "comments/comment/title": [
+        {
+          "command": "margo.setVaultTeam",
+          "group": "inline@1",
+          "when": "commentController == margo && comment =~ /^margoNote(Local|ResolvedLocal)$/"
+        },
+        {
+          "command": "margo.setVaultLocal",
+          "group": "inline@1",
+          "when": "commentController == margo && comment =~ /^margoNote(Team|ResolvedTeam)$/"
+        },
+        {
+          "command": "margo.resolveNote",
+          "group": "inline@2",
+          "when": "commentController == margo && comment =~ /^margoNote(Local|Team)$/"
+        },
+        {
+          "command": "margo.unresolveNote",
+          "group": "inline@2",
+          "when": "commentController == margo && comment =~ /^margoNoteResolved(Local|Team)$/"
+        },
+        {
+          "command": "margo.editNote",
+          "group": "inline@3",
+          "when": "commentController == margo && comment =~ /^margoNote(Local|Team|ResolvedLocal|ResolvedTeam)$/"
+        },
+        {
+          "command": "margo.armDeleteNote",
+          "group": "inline@4",
+          "when": "commentController == margo && comment =~ /^margoNote(Local|Team|ResolvedLocal|ResolvedTeam)$/"
+        },
+        {
+          "command": "margo.confirmDeleteNote",
+          "group": "inline@4",
+          "when": "commentController == margo && comment =~ /Armed$/"
+        },
+        {
+          "command": "margo.editProperties",
+          "group": "inline@0",
+          "when": "commentController == margo && comment =~ /^margoNote(Local|Team|ResolvedLocal|ResolvedTeam)$/"
+        }
+      ],
+      "comments/comment/context": [
+        {
+          "command": "margo.saveNote",
+          "group": "inline@0",
+          "when": "commentController == margo && comment =~ /^margoNote/"
+        },
+        {
+          "command": "margo.cancelNote",
+          "group": "inline@1",
+          "when": "commentController == margo && comment =~ /^margoNote/"
+        }
+      ]
+    },
+    "colors": [
+      {
+        "id": "margo.priorityHigh",
+        "description": "Color for high priority notes",
+        "defaults": {
+          "dark": "#f44336",
+          "light": "#d32f2f"
+        }
+      },
+      {
+        "id": "margo.priorityMedium",
+        "description": "Color for medium priority notes",
+        "defaults": {
+          "dark": "#ff9800",
+          "light": "#f57c00"
+        }
+      },
+      {
+        "id": "margo.priorityLow",
+        "description": "Color for low priority notes",
+        "defaults": {
+          "dark": "#4caf50",
+          "light": "#388e3c"
+        }
+      },
+      {
+        "id": "margo.deleteConfirm",
+        "description": "Color for delete confirmation button",
+        "defaults": {
+          "dark": "#f44336",
+          "light": "#d32f2f"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js",
+    "lint": "eslint src",
+    "package": "vsce package",
+    "publish:vscode": "vsce publish",
+    "publish:openvsx": "ovsx publish",
+    "publish:all": "npm run publish:vscode && npm run publish:openvsx"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.x",
+    "@typescript-eslint/parser": "^6.x",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.0.0",
+    "eslint": "^8.57.1",
+    "globals": "^16.5.0",
+    "mocha": "^11.3.0",
+    "ovsx": "^0.10.0",
+    "typescript": "^5.3.0"
+  }
+}
